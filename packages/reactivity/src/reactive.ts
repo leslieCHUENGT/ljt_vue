@@ -1,79 +1,63 @@
-import {
-  mutableHandlers,
-  readonlyHandlers,
-  shallowReadonlyHandlers,
-} from "./baseHandlers";
+import { isObject } from "@mick-vue/shared"
+import { mutableHandler, readonlyHandler, shallowReadonlyHandlers } from "./baseHandlers"
 
-export const reactiveMap = new WeakMap();
-export const readonlyMap = new WeakMap();
-export const shallowReadonlyMap = new WeakMap();
 
 export const enum ReactiveFlags {
-  IS_REACTIVE = "__v_isReactive",
-  IS_READONLY = "__v_isReadonly",
-  RAW = "__v_raw",
+  IS_REACTIVE = '__v_isReactive',
+  IS_READONLY = '__v_isReadonly',
+  RAW = '__v_raw'
 }
 
-export function reactive(target) {
-  return createReactiveObject(target, reactiveMap, mutableHandlers);
+const reactiveMap = new WeakMap()
+const readonlyMap = new WeakMap()
+const shallowReadonlyMap = new WeakMap()
+
+export function reactive(raw) {
+  return createReactiveObject(raw, mutableHandler, reactiveMap)
 }
 
-export function readonly(target) {
-  return createReactiveObject(target, readonlyMap, readonlyHandlers);
+export function readonly(raw) {
+  return createReactiveObject(raw, readonlyHandler, readonlyMap)
 }
 
-export function shallowReadonly(target) {
-  return createReactiveObject(
-    target,
-    shallowReadonlyMap,
-    shallowReadonlyHandlers
-  );
-}
-
-export function isProxy(value) {
-  return isReactive(value) || isReadonly(value);
-}
-
-export function isReadonly(value) {
-  return !!value[ReactiveFlags.IS_READONLY];
+export function shallowReadonly(raw) {
+  return createReactiveObject(raw, shallowReadonlyHandlers, shallowReadonlyMap)
 }
 
 export function isReactive(value) {
-  // 如果 value 是 proxy 的话
-  // 会触发 get 操作，而在 createGetter 里面会判断
-  // 如果 value 是普通对象的话
-  // 那么会返回 undefined ，那么就需要转换成布尔值
-  return !!value[ReactiveFlags.IS_REACTIVE];
+  return !!value[ReactiveFlags.IS_REACTIVE]
 }
 
-export function toRaw(value) {
-  // 如果 value 是 proxy 的话 ,那么直接返回就可以了
-  // 因为会触发 createGetter 内的逻辑
-  // 如果 value 是普通对象的话，
-  // 我们就应该返回普通对象
-  // 只要不是 proxy ，只要是得到了 undefined 的话，那么就一定是普通对象
-  // TODO 这里和源码里面实现的不一样，不确定后面会不会有问题
-  if (!value[ReactiveFlags.RAW]) {
-    return value;
+export function isReadonly(value) {
+  return !!value[ReactiveFlags.IS_READONLY]
+}
+
+export function isProxy(value) {
+  return isReactive(value) || isReadonly(value)
+}
+
+export function toRaw(observed) {
+  const raw = observed && observed[ReactiveFlags.RAW]
+  return raw ? toRaw(raw) : observed
+}
+
+
+function createReactiveObject(target, baseHandlers, proxyMap) {
+  if (!isObject(target)) {
+    console.warn(`target ${target}必须是一个对象`);
+    return target
   }
 
-  return value[ReactiveFlags.RAW];
-}
-
-function createReactiveObject(target, proxyMap, baseHandlers) {
-  // 核心就是 proxy
-  // 目的是可以侦听到用户 get 或者 set 的动作
-
-  // 如果命中的话就直接返回就好了
-  // 使用缓存做的优化点
-  const existingProxy = proxyMap.get(target);
+  // 优先通过原始对象Obj寻找之前创建的代理对象， 如果找到了，直接返回已有的代理对象
+  const existingProxy = proxyMap.get(target)
   if (existingProxy) {
-    return existingProxy;
+    return existingProxy
   }
 
-  const proxy = new Proxy(target, baseHandlers);
 
-  // 把创建好的 proxy 给存起来，
-  proxyMap.set(target, proxy);
-  return proxy;
+  const proxy = new Proxy(target, baseHandlers)
+  // 存储到Map中，从而避免重复创建
+  proxyMap.set(target, proxy)
+
+  return proxy
 }

@@ -1,104 +1,146 @@
-import { track, trigger } from "./effect";
-import {
-  reactive,
-  ReactiveFlags,
-  reactiveMap,
-  readonly,
-  readonlyMap,
-  shallowReadonlyMap,
-} from "./reactive";
-import { isObject } from "@mini-vue/shared";
+import { extend, hasChanged, hasOwn, isArray, isObject } from "@mick-vue/shared"
+import { ITERATE_KEY, pauseTracking, resetTracking, track, trigger } from "./effect"
+import { TriggerOpTyes } from "./operations"
+import { reactive, ReactiveFlags, readonly, toRaw } from "./reactive"
 
-const get = createGetter();
-const set = createSetter();
-const readonlyGet = createGetter(true);
-const shallowReadonlyGet = createGetter(true, true);
+const get = createGetter()
+const set = createSetter()
+
+const readonlyGet = createGetter(true)
+const shallowReadonlyGet = createGetter(true, true)
+
+
+const arrayInstrumentations = createArrayInstrumentations()
+function createArrayInstrumentations() {
+  const instrumentations = {}
+    ;['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
+      instrumentations[key] = function (...args) {
+        const arr = toRaw(this)
+        //this 是代理对象， 先在代理对象中查找  结果存在res中 
+        let res = arr[key](...args)
+        if (res === -1 || res === false) {
+          return arr[key](...args.map(toRaw))
+        } else {
+          return res
+        }
+      }
+    })
+
+    ;['push', 'pop', 'shift', 'unshift', 'splice'].forEach(key => {
+      instrumentations[key] = function (...args) {
+        pauseTracking()
+        const res = toRaw(this)[key].apply(this, args)
+        resetTracking()
+
+        return res
+      }
+    })
+
+  return instrumentations
+}
+
+
 
 function createGetter(isReadonly = false, shallow = false) {
-  return function get(target, key, receiver) {
-    const isExistInReactiveMap = () =>
-      key === ReactiveFlags.RAW && receiver === reactiveMap.get(target);
-
-    const isExistInReadonlyMap = () =>
-      key === ReactiveFlags.RAW && receiver === readonlyMap.get(target);
-
-    const isExistInShallowReadonlyMap = () =>
-      key === ReactiveFlags.RAW && receiver === shallowReadonlyMap.get(target);
+  return function get(target, key) {
+    const res = Reflect.get(target, key)
 
     if (key === ReactiveFlags.IS_REACTIVE) {
-      return !isReadonly;
+      return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
-      return isReadonly;
-    } else if (
-      isExistInReactiveMap() ||
-      isExistInReadonlyMap() ||
-      isExistInShallowReadonlyMap()
-    ) {
-      return target;
+      return isReadonly
+    } else if (key === ReactiveFlags.RAW) {
+      return target
     }
 
-    const res = Reflect.get(target, key, receiver);
-
-    // 问题：为什么是 readonly 的时候不做依赖收集呢
-    // readonly 的话，是不可以被 set 的， 那不可以被 set 就意味着不会触发 trigger
-    // 所有就没有收集依赖的必要了
-
-    if (!isReadonly) {
-      // 在触发 get 的时候进行依赖收集
-      track(target, "get", key);
+    if (isArray(target) && hasOwn(arrayInstrumentations, key)) {
+      return Reflect.get(arrayInstrumentations, key)
     }
 
     if (shallow) {
-      return res;
+      return res
+    }
+
+    if (!isReadonly) {
+      // 如果是嵌套对象 则需遍历执行reactive
+      track(target, key)
     }
 
     if (isObject(res)) {
-      // 把内部所有的是 object 的值都用 reactive 包裹，变成响应式对象
-      // 如果说这个 res 值是一个对象的话，那么我们需要把获取到的 res 也转换成 reactive
-      // res 等于 target[key]
-      return isReadonly ? readonly(res) : reactive(res);
+      return isReadonly ? readonly(res) : reactive(res)
     }
-
-    return res;
-  };
+    return res
+  }
 }
+
 
 function createSetter() {
-  return function set(target, key, value, receiver) {
-    const result = Reflect.set(target, key, value, receiver);
+  return function set(target, key, val, recevier) {
+    const oldValue = target[key]
+    const hadKey = isArray(target) ? Number(key) < target.length : hasOwn(target, key)
+    const res = Reflect.set(target, key, val)
 
-    // 在触发 set 的时候进行触发依赖
-    trigger(target, "set", key);
+    if (target === toRaw(recevier)) {
+      if (!hadKey) {
+        trigger(target, TriggerOpTyes.ADD, key)
+      } else if (hasChanged(val, oldValue)) {
+        trigger(target, TriggerOpTyes.SET, key)
+      }
+    }
 
-    return result;
-  };
+
+    return res
+  }
 }
 
-export const readonlyHandlers = {
-  get: readonlyGet,
-  set(target, key) {
-    // readonly 的响应式对象不可以修改值
-    console.warn(
-      `Set operation on key "${String(key)}" failed: target is readonly.`,
-      target
-    );
-    return true;
-  },
-};
+function deleteProperty(target, key) {
+  const hadKey = hasOwn(target, key)
 
-export const mutableHandlers = {
+  const result = Reflect.deleteProperty(target, key)
+
+  if (result && hadKey) {
+    trigger(target, TriggerOpTyes.DELETE, key)
+  }
+
+  return result
+}
+
+
+function has(target, key) {
+
+  const result = Reflect.has(target, key)
+  track(target, key)
+  return result
+}
+
+
+function ownKeys(target) {
+  track(target, isArray(target) ? 'length' : ITERATE_KEY)
+  return Reflect.ownKeys(target)
+}
+export const mutableHandler = {
   get,
   set,
-};
+  deleteProperty,
+  has,
+  ownKeys
+}
 
-export const shallowReadonlyHandlers = {
-  get: shallowReadonlyGet,
-  set(target, key) {
-    // readonly 的响应式对象不可以修改值
-    console.warn(
-      `Set operation on key "${String(key)}" failed: target is readonly.`,
-      target
-    );
-    return true;
+export const readonlyHandler = {
+  get: readonlyGet,
+  set(target, key, val) {
+    console.warn(`key: ${key} set 失败  因为target是readonly`, target);
+
+    return true
   },
-};
+  deleteProperty(target, key) {
+    console.warn(`key: ${key} del 失败  因为target是readonly`, target);
+
+    return true
+  }
+}
+
+export const shallowReadonlyHandlers = extend({}, readonlyHandler, {
+  get: shallowReadonlyGet
+})
+

@@ -1,14 +1,3 @@
-export {
-  reactive,
-  readonly,
-  shallowReadonly,
-  isReadonly,
-  isReactive,
-  isProxy,
-} from "./reactive";
-
-export { ref, proxyRefs, unRef, isRef } from "./ref";
-
-export { effect, stop, ReactiveEffect } from "./effect";
-
-export { computed } from "./computed";
+export { ref, proxyRefs, isRef } from "./ref"
+export { ReactiveEffect, effect } from "./effect"
+export { reactive, isReactive, shallowReadonly } from "./reactive"
