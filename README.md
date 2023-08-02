@@ -1,7 +1,7 @@
 # 往期源码文章
 [源码文章专栏](https://juejin.cn/column/7258222037318320186)
-- render、diff、vuex、vue-router、keepalive、slot、nextTick
-- axios源码解析
+- `render`、`diff`、`vuex`、`vue-router`、`keepalive`、`slot`、`nextTick`
+- ` axios `
 # my_vue
 
 基于 vue3 源码实现一个 TDD mini 版的 vue
