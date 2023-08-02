@@ -1,30 +1,28 @@
 {
-  "private": true,
-  "version": "0.0.1",
-  "description": "Help you learn more efficiently vue3 source code",
-  "main": "lib/mini-vue.cjs.js",
-  "module": "lib/mini-vue.esm.js",
+  "name": "mick-vue",
+  "version": "1.0.0",
+  "main": "lib/vue.cjs.js",
+  "module": "lib/vue.esm.js",
+  "repository": "git@github.com:leslieCHUENGT/my_vue",
+  "author": "laijingtao <l_chueng@163.com>",
+  "license": "MIT",
   "scripts": {
-    "dev": "rollup -c -w",
-    "build": "rollup -c",
-    "test": "vitest"
+    "test": "jest",
+    "build": "rollup -c rollup.config.js"
   },
-  "author": "cuixiaorui",
-  "homepage": "https://github.com/cuixiaorui",
-  "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^13.0.0",
-    "@rollup/plugin-node-resolve": "^8.1.0",
-    "@rollup/plugin-replace": "^2.3.3",
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.4",
+    "@babel/preset-typescript": "^7.15.0",
     "@rollup/plugin-typescript": "^8.2.5",
-    "rollup": "^2.17.1",
-    "rollup-plugin-sourcemaps": "^0.6.2",
+    "@types/jest": "^27.0.1",
+    "babel-jest": "^27.1.0",
+    "husky": "^7.0.4",
+    "jest": "^27.1.0",
+    "rollup": "^2.58.0",
+    "ts-jest": "^28.0.7",
     "tslib": "^2.3.1",
-    "typescript": "^4.4.3",
-    "vitest": "^0.22.1"
+    "typescript": "^4.4.2"
   },
-  "dependencies": {
-    "@vue/reactivity": "^3.0.5",
-    "pixi.js": "^6.2.0"
-  }
+  "packageManager": "pnpm@7.3.0"
 }
