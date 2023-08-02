@@ -4,7 +4,6 @@
 # my_vue
 
 基于 vue3 源码实现一个 TDD mini 版的 vue
-
 ### reactivity
 
 - [x] reactive 的实现
