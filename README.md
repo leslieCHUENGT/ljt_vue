@@ -1,4 +1,7 @@
-# mick-vue
+# 往期关于vue源码文章
+[Vue.js源码专栏](https://juejin.cn/column/7258222037318320186)
+[渲染原理、手写min-vuex、vue-router、双向绑定](https://github.com/leslieCHUENGT/vue_source)
+# my_vue
 
 基于 vue3 源码实现一个 TDD mini 版的 vue
 
@@ -25,29 +28,11 @@
 
 ### runtime-core
 
-- [x] 支持 element 类型
-- [x] 支持 proxy
-- [x] 初始化 props
-- [x] 支持 component emit
-- [x] 可以在 render 函数中获取 setup 返回的对象
-- [x] setup 可获取 props 和 context
-- [x] 支持 $el api
-- [x] 支持最基础的 slots
-- [x] 支持 Fragment
-- [x] 支持 Text 类型节点
-- [x] 支持 getCurrentInstance
-- [x] 支持 provide/inject
-- [x] 支持组件类型
-- [x] nextTick 的实现
 
 ### compiler-core
 
-- [x] 解析插值
-- [x] 解析 element
-- [x] 解析 text
 
 ### runtime-dom
 
-- [x] 支持 custom renderer
 
 
