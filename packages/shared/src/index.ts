@@ -47,5 +47,3 @@ export const NOOP = () => {}
 export const isSymbol = (val) => typeof val === "symbol"
 
 export const EMPTY_OBJ = {}
-
-export { ShapeFlags } from "./ShapeFlags"
