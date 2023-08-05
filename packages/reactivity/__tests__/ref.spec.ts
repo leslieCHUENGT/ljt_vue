@@ -4,7 +4,7 @@ import { isRef, proxyRefs, ref, unRef } from "../src/ref"
 
 
 describe('ref', () => {
-  it('happy path', () => {
+  it('path', () => {
     const a = ref(1)
     expect(a.value).toBe(1)
   })

@@ -1,7 +1,7 @@
 import { isProxy, isReactive, reactive } from '../src/reactive';
 
 describe('reactive', () => {
-  it('happy path', () => {
+  it('path', () => {
     const original = { foo: 1 }
     const observaed = reactive(original)
     expect(observaed).not.toBe(original)

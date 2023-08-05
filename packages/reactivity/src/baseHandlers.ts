@@ -1,4 +1,4 @@
-import { extend, hasChanged, hasOwn, isArray, isObject } from "@mick-vue/shared"
+import { extend, hasChanged, hasOwn, isArray, isObject } from "@min-vue/shared"
 import { ITERATE_KEY, pauseTracking, resetTracking, track, trigger } from "./effect"
 import { TriggerOpTyes } from "./operations"
 import { reactive, ReactiveFlags, readonly, toRaw } from "./reactive"

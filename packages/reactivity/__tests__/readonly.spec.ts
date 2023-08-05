@@ -1,7 +1,7 @@
 import { isProxy, isReadonly, readonly } from "../src/reactive"
 
 describe('readonly', () => {
-  it('happy path', () => {
+  it('path', () => {
     const original = { foo: 1, bar: { baz: 2 } }
     const wrapped = readonly(original)
     expect(wrapped).not.toBe(original)

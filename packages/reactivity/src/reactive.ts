@@ -1,4 +1,4 @@
-import { isObject } from "@mick-vue/shared"
+import { isObject } from "@min-vue/shared"
 import { mutableHandler, readonlyHandler, shallowReadonlyHandlers } from "./baseHandlers"
 
 // 响应式标志枚举

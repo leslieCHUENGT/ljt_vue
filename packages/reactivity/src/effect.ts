@@ -1,4 +1,4 @@
-import { extend, isArray } from "@mick-vue/shared"
+import { extend, isArray } from "@min-vue/shared"
 import { TriggerOpTyes } from "./operations"
 
 export const ITERATE_KEY = Symbol()

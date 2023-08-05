@@ -3,7 +3,7 @@ import { effect } from "../src/effect"
 import { reactive } from "../src/reactive"
 
 describe("computed", () => {
-  it("happy path", () => {
+  it("path", () => {
     // ref
     // value
     // 1. 缓存
