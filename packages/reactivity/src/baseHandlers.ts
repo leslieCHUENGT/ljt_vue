@@ -2,31 +2,24 @@ import { extend, hasChanged, hasOwn, isArray, isObject } from "@min-vue/shared"
 import { ITERATE_KEY, pauseTracking, resetTracking, track, trigger } from "./effect"
 import { TriggerOpTyes } from "./operations"
 import { reactive, ReactiveFlags, readonly, toRaw } from "./reactive"
-
-// 创建默认的getter和setter
+// 默认的
 const get = createGetter()
 const set = createSetter()
 
-// 创建只读的getter
-const readonlyGet = createGetter(true)
+const readonlyGet = createGetter(true)// 传递参数，创建可读的
+const shallowReadonlyGet = createGetter(true, true)// 创建浅只读的
 
-// 创建浅只读的getter
-const shallowReadonlyGet = createGetter(true, true)
-
-// 创建数组操作的函数
+// 对数组操作的函数进行代理重定义
 const arrayInstrumentations = createArrayInstrumentations()
 function createArrayInstrumentations() {
   const instrumentations = {}
-
-    // 遍历需要处理的数组操作函数
-    // 例如：includes、indexOf、lastIndexOf等
+    // 遍历类型的操作
     ;['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
-      // 将数组操作函数包装成代理对象的方法
       instrumentations[key] = function (...args) {
-        const arr = toRaw(this)
-        // 在原始对象中执行数组操作函数
+        const arr = toRaw(this)// 获取原始对象，拆箱
+        // 先在原始对象中找 
         let res = arr[key](...args)
-        // 如果操作函数返回-1或false，则表示在代理对象中未找到，需要在原始对象中再次执行
+        // 找不到的原因可能是元素也是代理对象，进行拆箱
         if (res === -1 || res === false) {
           return arr[key](...args.map(toRaw))
         } else {
@@ -35,17 +28,11 @@ function createArrayInstrumentations() {
       }
     })
 
-    // 遍历需要处理的数组操作函数
-    // 例如：push、pop、shift、unshift、splice等
     ;['push', 'pop', 'shift', 'unshift', 'splice'].forEach(key => {
-      // 将数组操作函数包装成代理对象的方法
       instrumentations[key] = function (...args) {
-        // 暂停追踪依赖
-        pauseTracking()
-        // 在原始对象中执行数组操作函数
+        pauseTracking()// 暂停追踪，维护性能
         const res = toRaw(this)[key].apply(this, args)
-        // 重置追踪依赖
-        resetTracking()
+        resetTracking()// 重置追踪依赖
 
         return res
       }
@@ -54,12 +41,12 @@ function createArrayInstrumentations() {
   return instrumentations
 }
 
-// 创建getter函数
+
+
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key) {
     const res = Reflect.get(target, key)
-
-    // 处理特殊的内部标记属性
+    // 访问该 key 属性则会进行判断要进行判断还是依赖追踪
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
@@ -67,48 +54,43 @@ function createGetter(isReadonly = false, shallow = false) {
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
-
-    // 如果是代理的数组对象，并且需要处理的是数组操作函数，则返回对应的包装方法
+    // 处理数组，如果原型上有该方法，则进行返回该代理的对象
     if (isArray(target) && hasOwn(arrayInstrumentations, key)) {
       return Reflect.get(arrayInstrumentations, key)
     }
-
-    // 如果是浅只读，直接返回值
+    // 浅只读，不需要进行追踪依赖
     if (shallow) {
       return res
     }
-
     // 如果是可变的对象，并且不是只读的，需要追踪依赖
     if (!isReadonly) {
       track(target, key)
     }
-
-    // 如果返回的值仍然是对象，则根据只读或可变状态进行递归处理
+    // 处理需要代理的对象嵌套的情况
     if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res)
     }
-
     return res
   }
 }
 
-// 创建setter函数
+
 function createSetter() {
   return function set(target, key, val, recevier) {
+    // 查看是否是新值
     const oldValue = target[key]
     const hadKey = isArray(target) ? Number(key) < target.length : hasOwn(target, key)
+    // 进行设置覆盖/新增
     const res = Reflect.set(target, key, val)
 
-    // 如果修改的是目标对象本身
     if (target === toRaw(recevier)) {
-      // 如果属性之前不存在，则触发ADD操作
-      if (!hadKey) {
+      if (!hadKey) {// 新增
         trigger(target, TriggerOpTyes.ADD, key)
-        // 如果属性值发生改变，则触发SET操作
-      } else if (hasChanged(val, oldValue)) {
+      } else if (hasChanged(val, oldValue)) {// 重置
         trigger(target, TriggerOpTyes.SET, key)
       }
     }
+
 
     return res
   }
@@ -168,3 +150,4 @@ export const readonlyHandler = {
 export const shallowReadonlyHandlers = extend({}, readonlyHandler, {
   get: shallowReadonlyGet
 })
+
