@@ -1,6 +1,7 @@
 import { extend, isArray } from "@min-vue/shared"
 import { TriggerOpTyes } from "./operations"
 
+
 // 定义常量
 export const ITERATE_KEY = Symbol()
 
@@ -8,7 +9,7 @@ export const ITERATE_KEY = Symbol()
 let activeEffect // 当前活动的副作用函数
 let shouldTrack // 是否需要跟踪副作用
 
-// 暂停跟踪副作用
+// 暂停跟踪副作用，暴露给数组的方法中使用
 export function pauseTracking() {
   shouldTrack = false
 }
@@ -42,7 +43,7 @@ export function effect(fn, options: any = {}) {
 export class ReactiveEffect {
   private _fn: any
   deps = [] // 依赖项集合
-  active = true // 是否处于激活状态
+  active = true // 是否处于激活状态，暴露出effect.stop()进行停止effect执行
   onStop?: () => void
 
   constructor(fn, public scheduler?) {
@@ -123,7 +124,9 @@ export function trackEffects(dep) {
 }
 
 // 触发副作用函数
+// 触发副作用函数
 export function trigger(target, type, key) {
+  // 从 targetMap 中获取依赖项映射关系 depsMap
   let depsMap = targetMap.get(target)
   if (!depsMap) {
     return
@@ -132,23 +135,16 @@ export function trigger(target, type, key) {
 
   // 根据不同的触发类型，获取相应的 dep
   if (key !== void 0) {
+    // 如果存在键值 key，则从 depsMap 中获取对应的 dep，并加入到 deps 数组中
     deps.push(depsMap.get(key))
   }
 
-  if (type === TriggerOpTyes.ADD) {
-    if (!isArray(target)) {
-      deps.push(depsMap.get(ITERATE_KEY))
-    } else {
-      deps.push(depsMap.get("length"))
-    }
-  } else if (type === TriggerOpTyes.DELETE) {
-    deps.push(depsMap.get(ITERATE_KEY))
-  }
 
   // 获取所有 effects
   const effects: any = []
   for (const dep of deps) {
     if (dep) {
+      // 将 dep 中的所有副作用函数添加到 effects 数组中
       effects.push(...dep)
     }
   }
@@ -159,14 +155,18 @@ export function trigger(target, type, key) {
 
 // 触发副作用函数
 export function triggerEffects(dep) {
+  // 遍历 dep 数组中的每个副作用函数 effect
   for (const effect of dep) {
     if (effect.scheduler) {
+      // 如果 effect 中定义了 scheduler，则调用 scheduler 函数
       effect.scheduler()
     } else {
+      // 否则直接调用 effect 的 run 方法运行副作用函数
       effect.run()
     }
   }
 }
+
 
 // 停止运行 runner 函数
 export function stop(runner) {
