@@ -1,6 +1,9 @@
 # 🕳️ 声明
 项目是通过阅读[vue3](https://github.com/vuejs/core/tree/main)源码，函数名、代码组织方式都与vue3官方保持一致，抽离一切非vue的核心逻辑。**如果大家在阅读过程中发现任何问题，欢迎在issue中提出，同时也欢迎大家提交PR。当然如果在阅读过程中有什么疑惑，也欢迎在issue中提出。**
-
+# ✏ 源码文章
+[源码文章专栏](https://juejin.cn/column/7258222037318320186)
+- `render`、`diff`、`vuex`、`vue-router`、`keepalive`、`slot`、`nextTick`
+- ` axios `
 # 🙌 使用方式
 
 项目采取monorepo结构
@@ -15,10 +18,6 @@
 
 2. 在运行index.html文件的时候同样推荐大家安装vscode插件[Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
-# ✏ 往期源码文章
-[源码文章专栏](https://juejin.cn/column/7258222037318320186)
-- `render`、`diff`、`vuex`、`vue-router`、`keepalive`、`slot`、`nextTick`
-- ` axios `
 # 🛠 功能清单
 
 ### reactivity 部分
