@@ -6,17 +6,11 @@
 - ` axios `
 # 🙌 使用方式
 
-项目采取monorepo结构
-当然也可以选择自己打包
-~~~shell
-  pnpm run build
-  or
-  nr build 
-~~~
-# 🗯️ 插件
-1. 这里推荐大家使用[ni](https://github.com/antfu/ni)
+项目采取monorepo结构:
 
-2. 在运行index.html文件的时候同样推荐大家安装vscode插件[Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+~~~shell
+ yarn i
+~~~
 
 # 🛠 功能清单
 
