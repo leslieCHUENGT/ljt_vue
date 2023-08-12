@@ -43,13 +43,11 @@
 - [x] 实现 isShallow 功能
 
 #### 代理对象
-- [x] 实现拦截in操作符(xx in obj  是不会触发 get 和 set 操作的 他会触发 has 操作 所以需要针对in操作符在 proxy 完善 has 拦截器)
+- [x] 实现拦截 in 操作符(xx in obj  是不会触发 get 和 set 操作的 他会触发 has 操作 所以需要针对in操作符在 proxy 完善 has 拦截器)
 - [x] 实现拦截 delete 操作符(delete obj.xxx  是不会触发 get 和 set 操作的 他会触发 deleteProperty 操作 所以需要针对 delete 操作符在 proxy 完善 deleteProperty 拦截器)
 - [x] 实现拦截 for in 语句(for(let key in obj){your code...}  是不会触发get和set操作的 他会触发 ownKeys 操作 所以需要针对 in 操作符在 proxy 完善 ownKeys 拦截器)
-- [x] 屏蔽由于原型引起的无意义更新
 
 #### 代理数组
-- [x] 实现数组 for in 循环的依赖收集与触发 && length 属性的依赖收集与触发
 - [x] 重写 array 的 includes & indexOf & lastIndexOf 方法
 - [x] 重写 array 的 push & pop & shift & unshift & splice 方法 (这几个方法会影响数组的length属性 如果不屏蔽对length属性的依赖会造成死循环)
 
