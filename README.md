@@ -1,4 +1,4 @@
-# 往期源码文章
+# 相关文章总结
 [源码文章专栏](https://juejin.cn/column/7258222037318320186)
 - `render`、`diff`、`vuex`、`vue-router`、`keepalive`、`slot`、`nextTick`
 - ` axios `
@@ -31,3 +31,7 @@
 
 
 ### runtime-dom
+
+# 参考
+
+基于 mini-vue 的实现，再阅读 vue3 源码 总结
