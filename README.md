@@ -1,12 +1,10 @@
-# 往期源码文章
+# 相关文章总结
 [源码文章专栏](https://juejin.cn/column/7258222037318320186)
 - `render`、`diff`、`vuex`、`vue-router`、`keepalive`、`slot`、`nextTick`
 - ` axios `
 # my_vue
-
 基于 vue3 源码实现一个 TDD mini 版的 vue
 ### reactivity
-
 - [x] reactive 的实现
 - [x] track 依赖收集
 - [x] trigger 触发依赖
@@ -24,9 +22,16 @@
 - [x] 支持 unref
 - [x] 支持 proxyRefs
 - [x] computed 的实现
+- [x] watch 的实现
+
+### runtime-core
 
 
+### compiler-core
 
 
+### runtime-dom
 
+# 参考
 
+基于 mini-vue 的实现，再阅读 vue3 源码 总结
