@@ -52,9 +52,7 @@ export function normalizeChildren(vnode, children) {
 export const Text = Symbol("Text");
 export const Fragment = Symbol("Fragment");
 
-/**
- * @private
- */
+
 export function createTextVNode(text: string = " ") {
   return createVNode(Text, {}, text);
 }
